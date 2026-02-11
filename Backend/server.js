@@ -20,7 +20,7 @@ app.use(cookieParser());
 
 const corsOptions = {
     origin: [
-      "https://jobportal1001.netlify.app/"
+      ""
     ],
   credentials: true,
 };
