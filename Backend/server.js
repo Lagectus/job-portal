@@ -5,39 +5,43 @@ import dotenv from "dotenv";
 import connectDB from "./utils/db.js";
 import userRoute from "./routes/user.route.js";
 import companyRoute from "./routes/comapny.route.js";
-import jobRoute from './routes/job.route.js'
-import applicationRoute from './routes/applications.route.js'
+import jobRoute from "./routes/job.route.js";
+import applicationRoute from "./routes/applications.route.js";
+
 dotenv.config({});
+
 const app = express();
 
-// middleware
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-// cors
 
 const corsOptions = {
-    origin: [,
-      "https://jobportal1001.netlify.app/"
-    ],
-  credentials: true,
+  origin: [
+    "http://localhost:5173",                         
+    "https://job-portal-green-five.vercel.app",       
+  ],
+  credentials: true,                                 
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
 };
 
 app.use(cors(corsOptions));
 
+// ── Middleware ────────────────────────────────────────────────────────────────
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// ── Health check ──────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
-  res.send("hello");
+  res.send("Server is running");
 });
 
-// api's
-
+// ── API Routes ────────────────────────────────────────────────────────────────
 app.use("/api/users", userRoute);
 app.use("/api/company", companyRoute);
 app.use("/api/job", jobRoute);
 app.use("/api/application", applicationRoute);
 
+// ── Start Server ──────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   connectDB();
