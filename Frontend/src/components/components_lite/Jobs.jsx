@@ -1,67 +1,83 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "./Navbar";
-import FilterCard from "./FilterCard.jsx";
+import FilterCard from "./FilterCard";
 import Job from "./Job";
 import { useSelector } from "react-redux";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { Search } from "lucide-react";
 
 const Jobs = () => {
-  const { allJobs, searchedQuery } = useSelector((store) => store.job);
+  const { allJobs, searchedQuery } = useSelector((s) => s.job);
   const [filterJobs, setFilterJobs] = useState(allJobs);
 
   useEffect(() => {
-    if (!searchedQuery || searchedQuery.trim() === "") {
-      setFilterJobs(allJobs);
-      return;
-    }
-
-    const query = searchedQuery.toLowerCase();
-    const filteredJobs = allJobs.filter((job) =>
-      job.title?.toLowerCase().includes(query) ||
-      job.description?.toLowerCase().includes(query) ||
-      job.location?.toLowerCase().includes(query) ||
-      job.experienceLevel?.toString().includes(query) ||
-      job.salary?.toLowerCase().includes(query)
+    if (!searchedQuery?.trim()) { setFilterJobs(allJobs); return; }
+    const q = searchedQuery.toLowerCase();
+    setFilterJobs(
+      allJobs.filter(
+        (j) =>
+          j.title?.toLowerCase().includes(q) ||
+          j.description?.toLowerCase().includes(q) ||
+          j.location?.toLowerCase().includes(q) ||
+          j.salary?.toLowerCase().includes(q)
+      )
     );
-
-    setFilterJobs(filteredJobs);
   }, [allJobs, searchedQuery]);
 
   return (
-    <div>
+    <div style={{ minHeight: "100vh", background: "var(--bg-base)", fontFamily: "var(--font-body)" }}>
       <Navbar />
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 24px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ marginBottom: 28 }}
+        >
+          <h1
+            style={{
+              fontFamily: "var(--font-display)", fontWeight: 800,
+              fontSize: 32, color: "#f1f5f9", letterSpacing: "-1px", margin: 0,
+            }}
+          >
+            {filterJobs.length} <span style={{ color: "#22d3ee" }}>Jobs</span> Found
+          </h1>
+        </motion.div>
 
-      <div className="max-w-7xl mx-auto mt-5 px-4">
-        <div className="flex flex-col lg:flex-row gap-5">
-
-          {/* Filter Section */}
-          <div className="w-full lg:w-1/5">
+        <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+          {/* Filter Sidebar */}
+          <div style={{ width: 256, flexShrink: 0, position: "sticky", top: 88 }}>
             <FilterCard />
           </div>
 
-          {/* Jobs Section */}
-          <div className="flex-1">
+          {/* Jobs Grid */}
+          <div style={{ flex: 1 }}>
             {filterJobs.length === 0 ? (
-              <span className="text-gray-500">Job not found</span>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                style={{ textAlign: "center", padding: "80px 0" }}
+              >
+                <Search size={40} color="#334155" style={{ margin: "0 auto 16px", display: "block" }} />
+                <p style={{ color: "#475569", fontSize: 16, fontWeight: 500 }}>No jobs match your search</p>
+              </motion.div>
             ) : (
-              <div className="h-auto lg:h-[88vh] overflow-y-auto overflow-x-hidden pb-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filterJobs.map((job) => (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 14 }}>
+                <AnimatePresence>
+                  {filterJobs.map((job, i) => (
                     <motion.div
                       key={job._id}
-                      initial={{ opacity: 0, x: 100 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -100 }}
-                      transition={{ duration: 0.4 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: i * 0.04, duration: 0.35 }}
                     >
                       <Job job={job} />
                     </motion.div>
                   ))}
-                </div>
+                </AnimatePresence>
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>

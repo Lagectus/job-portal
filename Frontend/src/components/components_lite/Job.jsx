@@ -1,106 +1,154 @@
-import React from "react";
-import { Button } from "../ui/button";
-import { Bookmark, BookMarked } from "lucide-react";
-import { Avatar, AvatarImage } from "../ui/avatar";
-import { Badge } from "../ui/badge";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { MapPin, Clock, DollarSign, ArrowUpRight, Bookmark, BookmarkCheck } from "lucide-react";
 
 const Job = ({ job }) => {
   const navigate = useNavigate();
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
-  const daysAgoFunction = (mongodbTime) => {
-    const createdAt = new Date(mongodbTime);
-    const currentTime = new Date();
-    const timeDifference = currentTime - createdAt;
-    return Math.floor(timeDifference / (1000 * 24 * 60 * 60));
+  const daysAgo = (mongodbTime) => {
+    const diff = new Date() - new Date(mongodbTime);
+    const days = Math.floor(diff / (1000 * 24 * 60 * 60));
+    return days === 0 ? "Today" : `${days}d ago`;
   };
 
-  const [isBookmarked, setIsBookmarked] = React.useState(false);
+  const colors = ["#22d3ee", "#a3e635", "#f472b6", "#fb923c", "#818cf8"];
+  const accent = colors[Math.abs((job?.company?.name?.charCodeAt(0) || 0)) % colors.length];
 
   return (
-    <div
-      className="p-4 sm:p-5 rounded-md bg-white border border-gray-200 cursor-pointer
-      transition-all duration-300 ease-in-out transform-gpu will-change-transform
-      hover:shadow-2xl hover:shadow-blue-200 hover:scale-105"
+    <motion.div
+      whileHover={{ y: -5 }}
+      whileTap={{ scale: 0.99 }}
+      style={{
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: 20, padding: "20px 20px 16px",
+        fontFamily: "var(--font-body)",
+        position: "relative", overflow: "hidden",
+        transition: "background 0.25s, border-color 0.25s",
+      }}
+      onHoverStart={(e) => {
+        e.currentTarget.style.background = "rgba(255,255,255,0.07)";
+        e.currentTarget.style.borderColor = accent + "30";
+      }}
+      onHoverEnd={(e) => {
+        e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+        e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+      }}
     >
-      {/* Top Row */}
-      <div className="flex items-center justify-between">
-        <p className="text-xs sm:text-sm text-gray-500">
-          {daysAgoFunction(job?.createdAt) === 0
-            ? "Today"
-            : `${daysAgoFunction(job?.createdAt)} days ago`}
-        </p>
+      {/* Top accent bar */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg,${accent},transparent)`, borderRadius: "20px 20px 0 0" }} />
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full"
-          onClick={() => setIsBookmarked(!isBookmarked)}
+      {/* Row 1 — date + bookmark */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+        <span style={{ fontSize: 11, color: "#475569", fontWeight: 500 }}>{daysAgo(job?.createdAt)}</span>
+        <motion.button
+          whileHover={{ scale: 1.15 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={(e) => { e.stopPropagation(); setIsBookmarked(!isBookmarked); }}
+          style={{
+            width: 32, height: 32, borderRadius: "50%",
+            background: isBookmarked ? accent + "20" : "rgba(255,255,255,0.05)",
+            border: `1px solid ${isBookmarked ? accent + "40" : "rgba(255,255,255,0.1)"}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            cursor: "pointer", transition: "all 0.2s",
+          }}
         >
-          {isBookmarked ? <BookMarked /> : <Bookmark />}
-        </Button>
+          {isBookmarked
+            ? <BookmarkCheck size={14} color={accent} />
+            : <Bookmark size={14} color="#475569" />
+          }
+        </motion.button>
       </div>
 
-      {/* Company */}
-      <div className="flex items-center gap-3 my-3">
-        <Button variant="outline" size="icon" className="p-5 sm:p-6">
-          <Avatar>
-            <AvatarImage src={job?.company?.logo} />
-          </Avatar>
-        </Button>
-
+      {/* Row 2 — company avatar + name */}
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+        <div
+          style={{
+            width: 44, height: 44, borderRadius: 13, flexShrink: 0,
+            background: accent + "18", border: `1px solid ${accent}30`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 17, color: accent,
+          }}
+        >
+          {job?.company?.logo
+            ? <img src={job.company.logo} alt="" style={{ width: "100%", height: "100%", borderRadius: 13, objectFit: "cover" }} />
+            : job?.company?.name?.charAt(0) || "?"}
+        </div>
         <div>
-          <h1 className="text-base sm:text-lg font-medium">
-            {job?.company?.name}
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-600">India</p>
+          <p style={{ fontWeight: 700, fontSize: 14, color: "#f1f5f9", margin: 0, lineHeight: 1.3 }}>{job?.company?.name}</p>
+          <p style={{ fontSize: 11, color: "#475569", margin: "2px 0 0" }}>India</p>
         </div>
       </div>
 
-      {/* Job Info */}
-      <div>
-        <h2 className="font-bold text-base sm:text-lg my-1">
-          {job?.title}
-        </h2>
-        <p className="text-xs sm:text-sm text-gray-600 line-clamp-3">
-          {job?.description}
-        </p>
+      {/* Job title + desc */}
+      <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 15, color: "#f1f5f9", margin: "0 0 6px", letterSpacing: "-0.3px", lineHeight: 1.3 }}>
+        {job?.title}
+      </h3>
+      <p style={{ fontSize: 12, color: "#475569", lineHeight: 1.65, margin: "0 0 14px", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+        {job?.description}
+      </p>
 
-        {/* Badges */}
-        <div className="flex flex-wrap gap-2 items-center mt-4 text-xs sm:text-sm">
-          <Badge className="text-blue-700 font-bold" variant="ghost">
-            {job?.position} Open Positions
-          </Badge>
-          <Badge className="text-[#E35B14] font-bold" variant="ghost">
-            {job?.salary} LPA
-          </Badge>
-          <Badge className="text-[#6B3AC2] font-bold" variant="ghost">
-            {job?.location}
-          </Badge>
-          <Badge className="text-black font-bold" variant="ghost">
-            {job?.jobType}
-          </Badge>
-        </div>
+      {/* Tags */}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 16 }}>
+        {[
+          { icon: <MapPin size={10} />, label: job?.location },
+          { icon: <Clock size={10} />, label: job?.jobType },
+          { icon: <DollarSign size={10} />, label: `${job?.salary} LPA` },
+        ].map(({ icon, label }) => (
+          <span
+            key={label}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 4,
+              padding: "3px 9px", borderRadius: 100,
+              background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)",
+              color: "#64748b", fontSize: 11, fontWeight: 500,
+            }}
+          >
+            <span style={{ color: accent }}>{icon}</span>{label}
+          </span>
+        ))}
+        <span style={{ padding: "3px 9px", borderRadius: 100, background: accent + "12", border: `1px solid ${accent}25`, color: accent, fontSize: 11, fontWeight: 600 }}>
+          {job?.position} open
+        </span>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 mt-5">
-        <Button
+      {/* Action buttons */}
+      <div style={{ display: "flex", gap: 8, paddingTop: 14, borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
           onClick={() => navigate(`/description/${job?._id}`)}
-          variant="outline"
-          className="font-bold w-full sm:w-auto"
+          style={{
+            flex: 1, padding: "9px 0", borderRadius: 10,
+            background: "transparent", border: "1px solid rgba(255,255,255,0.12)",
+            color: "#94a3b8", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 600,
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+            transition: "all 0.2s",
+          }}
+          onMouseOver={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.25)"; e.currentTarget.style.color = "#f1f5f9"; }}
+          onMouseOut={(e) => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)"; e.currentTarget.style.color = "#94a3b8"; }}
         >
-          Details
-        </Button>
+          Details <ArrowUpRight size={12} />
+        </motion.button>
 
-        <Button
-          variant="outline"
-          className="bg-[#6B3AC2] text-white font-bold w-full sm:w-auto"
+        <motion.button
+          whileHover={{ scale: 1.03, boxShadow: `0 0 16px ${accent}40` }}
+          whileTap={{ scale: 0.97 }}
+          onClick={(e) => { e.stopPropagation(); setIsBookmarked(true); }}
+          style={{
+            flex: 1, padding: "9px 0", borderRadius: 10,
+            background: `linear-gradient(135deg, ${accent}, ${accent}cc)`,
+            border: "none", color: "#0a0a0f",
+            fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 700,
+            cursor: "pointer",
+          }}
         >
-          Save For Later
-        </Button>
+          Save for Later
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

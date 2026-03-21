@@ -1,142 +1,138 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components_lite/Navbar";
-import { Label } from "../ui/label";
-import { Input } from "../ui/input";
-import { RadioGroup } from "../ui/radio-group";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "sonner";
 import { USER_API_ENDPOINT } from "../../utils/data";
 import { useDispatch, useSelector } from "react-redux";
 import { setLoading, setUser } from "../../redux/authSlice";
-import { Loader2 } from "lucide-react";
-import { Button } from "../ui/button";
+import { Loader2, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { loading, user } = useSelector((s) => s.auth);
+  const [input, setInput] = useState({ email: "", password: "", role: "" });
 
-  const { loading, user } = useSelector((store) => store.auth);
+  const set = (e) => setInput((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  const [input, setInput] = useState({
-    email: "",
-    password: "",
-    role: "",
-  });
+  useEffect(() => { if (user) navigate("/"); }, [user, navigate]);
 
-  const changeEventHandler = (e) => {
-    setInput({ ...input, [e.target.name]: e.target.value });
-  };
-
-  useEffect(() => {
-    if (user) {
-      navigate("/");
-    }
-  }, [user, navigate]);
-
-  const submitHandler = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-
-    if (!input.email || !input.password || !input.role) {
-      toast.error("Please fill all fields and select a role.");
-      return;
-    }
-
+    if (!input.email || !input.password || !input.role) { toast.error("Please fill all fields"); return; }
     try {
       dispatch(setLoading(true));
       const res = await axios.post(`${USER_API_ENDPOINT}/login`, input, {
-        headers: { "Content-Type": "application/json" },
-        withCredentials: true,
+        headers: { "Content-Type": "application/json" }, withCredentials: true,
       });
-
-      if (res.data.success) {
-        dispatch(setUser(res.data.user));
-        toast.success(res.data.message);
-        navigate("/");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error(error?.response?.data?.message || "Login failed");
-    } finally {
-      dispatch(setLoading(false));
-    }
+      if (res.data.success) { dispatch(setUser(res.data.user)); toast.success(res.data.message); navigate("/"); }
+    } catch (e) { toast.error(e?.response?.data?.message || "Login failed"); }
+    finally { dispatch(setLoading(false)); }
   };
 
+  const inputStyle = {
+    width: "100%", padding: "12px 16px", borderRadius: 12,
+    background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.1)",
+    color: "#f1f5f9", fontFamily: "var(--font-body)", fontSize: 14,
+    outline: "none", transition: "border-color 0.2s, box-shadow 0.2s", boxSizing: "border-box",
+  };
+
+  const onFocus = (e) => { e.target.style.borderColor = "rgba(34,211,238,0.5)"; e.target.style.boxShadow = "0 0 0 3px rgba(34,211,238,0.08)"; };
+  const onBlur  = (e) => { e.target.style.borderColor = "rgba(255,255,255,0.1)";  e.target.style.boxShadow = "none"; };
+
   return (
-    <>
+    <div style={{ minHeight: "100vh", background: "var(--bg-base)", fontFamily: "var(--font-body)" }}>
       <Navbar />
-
-      <div className="flex items-center justify-center py-10 px-4">
-        <form
-          onSubmit={submitHandler}
-          className="w-full max-w-md border border-gray-300 rounded-lg p-6 bg-white shadow-sm"
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 68px)", padding: 24 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          style={{
+            width: "100%", maxWidth: 420,
+            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.09)",
+            borderRadius: 24, padding: 36,
+          }}
         >
-          <h1 className="font-bold text-2xl mb-6 text-center text-blue-600">
-            Login
-          </h1>
-
-          {/* Email */}
-          <div className="mb-4">
-            <Label>Email</Label>
-            <Input
-              type="email"
-              value={input.email}
-              name="email"
-              onChange={changeEventHandler}
-              placeholder="Enter your email"
-              required
-            />
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: "linear-gradient(135deg,#22d3ee,#a3e635)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Zap size={16} color="#0a0a0f" strokeWidth={2.5} />
+            </div>
+            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "#f1f5f9", margin: 0, letterSpacing: "-0.5px" }}>
+              Welcome Back
+            </h1>
           </div>
 
-          {/* Password */}
-          <div className="mb-4">
-            <Label>Password</Label>
-            <Input
-              type="password"
-              value={input.password}
-              name="password"
-              onChange={changeEventHandler}
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-
-          {/* Role */}
-          <RadioGroup className="flex items-center gap-6 my-5">
-            {["Student", "Recruiter"].map((role) => (
-              <div key={role} className="flex items-center gap-2">
-                <Input
-                  type="radio"
-                  name="role"
-                  value={role}
-                  checked={input.role === role}
-                  onChange={changeEventHandler}
-                  required
+          <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            {[
+              { name: "email",    type: "email",    placeholder: "your@email.com", label: "Email" },
+              { name: "password", type: "password", placeholder: "Password",       label: "Password" },
+            ].map(({ name, type, placeholder, label }) => (
+              <div key={name}>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#64748b", marginBottom: 6, letterSpacing: "0.3px" }}>
+                  {label.toUpperCase()}
+                </label>
+                <input
+                  name={name} type={type} value={input[name]}
+                  onChange={set} placeholder={placeholder}
+                  onFocus={onFocus} onBlur={onBlur}
+                  style={inputStyle}
                 />
-                <Label>{role}</Label>
               </div>
             ))}
-          </RadioGroup>
 
-          {/* Submit */}
-          <Button
-            type="submit"
-            className="w-full py-3 my-3 flex items-center justify-center"
-            disabled={loading}
-          >
-            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Login"}
-          </Button>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: "#64748b", marginBottom: 10, letterSpacing: "0.3px" }}>
+                LOGIN AS
+              </label>
+              <div style={{ display: "flex", gap: 10 }}>
+                {["Student", "Recruiter"].map((role) => (
+                  <label
+                    key={role}
+                    style={{
+                      flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+                      gap: 8, padding: 10, borderRadius: 12,
+                      background: input.role === role ? "rgba(34,211,238,0.1)" : "rgba(255,255,255,0.03)",
+                      border: `1.5px solid ${input.role === role ? "rgba(34,211,238,0.4)" : "rgba(255,255,255,0.08)"}`,
+                      cursor: "pointer", transition: "all 0.2s",
+                      color: input.role === role ? "#22d3ee" : "#64748b",
+                      fontSize: 13, fontWeight: 600,
+                    }}
+                  >
+                    <input type="radio" name="role" value={role} checked={input.role === role} onChange={set} style={{ display: "none" }} />
+                    {role}
+                  </label>
+                ))}
+              </div>
+            </div>
 
-          {/* Register link */}
-          <p className="text-gray-500 text-sm mt-4 text-center">
+            <motion.button
+              type="submit" disabled={loading}
+              whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(34,211,238,0.35)" }}
+              whileTap={{ scale: 0.98 }}
+              style={{
+                marginTop: 6, padding: 13, borderRadius: 12,
+                background: "linear-gradient(135deg,#22d3ee,#0ea5e9)",
+                border: "none", color: "#0a0a0f",
+                fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 15,
+                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              }}
+            >
+              {loading ? <Loader2 size={18} className="animate-spin" /> : "Login →"}
+            </motion.button>
+          </form>
+
+          <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "#475569" }}>
             No account?{" "}
-            <Link className="text-blue-600 hover:underline" to="/register">
+            <Link to="/register" style={{ color: "#22d3ee", fontWeight: 600, textDecoration: "none" }}>
               Register
             </Link>
           </p>
-        </form>
+        </motion.div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -1,74 +1,65 @@
 import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import { Badge } from "../ui/badge";
 import { useSelector } from "react-redux";
+import { motion } from "framer-motion";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 
 const AppliedJob = () => {
-  const { allAppliedJobs } = useSelector((store) => store.job);
+  const { allAppliedJobs } = useSelector((s) => s.job);
 
-  const getStatusStyle = (status) => {
-    switch (status) {
-      case "accepted":
-        return "text-green-600 border-green-600";
-      case "rejected":
-        return "text-red-500 border-red-500";
-      case "pending":
-        return "text-gray-600 border-gray-400";
-      default:
-        return "text-gray-500 border-gray-300";
-    }
+  const STATUS = {
+    accepted: { color: "#a3e635", bg: "rgba(163,230,53,0.1)",  border: "rgba(163,230,53,0.25)",  Icon: CheckCircle },
+    rejected: { color: "#f87171", bg: "rgba(248,113,113,0.1)", border: "rgba(248,113,113,0.25)", Icon: XCircle },
+    pending:  { color: "#fbbf24", bg: "rgba(251,191,36,0.1)",  border: "rgba(251,191,36,0.25)",  Icon: Clock },
   };
 
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableCaption>Recent Applied Jobs</TableCaption>
-
-        <TableHeader>
-          <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Job Title</TableHead>
-            <TableHead>Company</TableHead>
-            <TableHead className="text-right">Status</TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {allAppliedJobs.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={4} className="text-center text-gray-500">
-                You have not applied to any job yet.
-              </TableCell>
-            </TableRow>
-          ) : (
-            allAppliedJobs.map((appliedJob) => (
-              <TableRow key={appliedJob._id}>
-                <TableCell>
-                  {appliedJob?.createdAt?.split("T")[0]}
-                </TableCell>
-                <TableCell>{appliedJob.job?.title}</TableCell>
-                <TableCell>{appliedJob.job?.company?.name}</TableCell>
-                <TableCell className="text-right">
-                  <Badge
-                    className={`bg-white border rounded-full px-4 py-1 text-xs font-semibold capitalize
-                    ${getStatusStyle(appliedJob?.status)}`}
-                  >
-                    {appliedJob?.status}
-                  </Badge>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+    <div style={{ fontFamily: "var(--font-body)" }}>
+      {allAppliedJobs.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px 0", color: "#334155" }}>
+          <p style={{ fontSize: 15, fontWeight: 500 }}>No applications yet</p>
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {allAppliedJobs.map((job, i) => {
+            const cfg = STATUS[job?.status] || STATUS.pending;
+            const { Icon } = cfg;
+            return (
+              <motion.div
+                key={job._id}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.07 }}
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  border: "1px solid rgba(255,255,255,0.07)",
+                  borderRadius: 16, padding: "16px 20px",
+                  display: "flex", justifyContent: "space-between",
+                  alignItems: "center", flexWrap: "wrap", gap: 12,
+                }}
+              >
+                <div>
+                  <p style={{ fontWeight: 700, color: "#f1f5f9", fontSize: 14, margin: "0 0 3px" }}>
+                    {job.job?.title}
+                  </p>
+                  <p style={{ fontSize: 12, color: "#475569", margin: 0 }}>
+                    {job.job?.company?.name} · {job?.createdAt?.split("T")[0]}
+                  </p>
+                </div>
+                <span
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 5,
+                    padding: "5px 14px", borderRadius: 100,
+                    background: cfg.bg, border: `1px solid ${cfg.border}`,
+                    color: cfg.color, fontSize: 12, fontWeight: 700, textTransform: "capitalize",
+                  }}
+                >
+                  <Icon size={12} /> {job?.status}
+                </span>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
