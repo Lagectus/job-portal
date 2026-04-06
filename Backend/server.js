@@ -18,9 +18,7 @@ const corsOptions = {
     "http://localhost:5173",                         
     "https://job-portal-green-five.vercel.app",       
   ],
-  credentials: true,                                 
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,                                
 };
 
 app.use(cors(corsOptions));
