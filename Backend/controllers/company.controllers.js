@@ -26,9 +26,13 @@ export const registercomany = async (req, res) => {
       company,
       success: true,
     });
-  } catch (error) {
-    console.log(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 // getAllCompanies
@@ -40,9 +44,13 @@ export const getAllCompanies = async (req, res) => {
       return res.status(404).json({ message: " no company found" });
     }
     return res.status(200).json({ companies, success: true });
-  } catch (error) {
-    console.log(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 // get company by id
@@ -54,9 +62,13 @@ export const getCompanyById = async (req, res) => {
       return res.status(404).json({ message: "Company not found" });
     }
     return res.status(200).json({ company, success: true });
-  } catch (error) {
-    console.log(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 //update company details
@@ -77,7 +89,11 @@ export const updateCompany = async (req, res) => {
       return res.status(404).json({ message: "Company not found" });
     }
     return res.status(200).json({ message: "Company updated" });
-  } catch (error) {
-    console.error(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };

@@ -42,8 +42,12 @@ export const applyjobs = async (req, res) => {
       .status(201)
       .json({ message: "Application Submit", success: true });
   } catch (error) {
-    console.log(error);
-  }
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 //
@@ -64,8 +68,12 @@ export const getAppliedJobs = async (req, res) => {
     }
     return res.status(200).json({ application, success: true });
   } catch (error) {
-    console.log(error);
-  }
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 // total apply candidate
@@ -82,8 +90,12 @@ export const getApplicants = async (req, res) => {
     }
     return res.status(200).json({ job, success: true });
   } catch (error) {
-    console.log(error);
-  }
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 // application accept,reject,pending
@@ -113,7 +125,11 @@ export const updateStatus = async (req, res) => {
     return res
       .status(200)
       .json({ message: "Application status updated", success: true });
-  } catch (error) {
-    console.log(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };

@@ -46,9 +46,13 @@ export const postjob = async (req, res) => {
     return res
       .status(200)
       .json({ message: "job create successfully", job, status: true });
-  } catch (error) {
-    console.log(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 //Users
@@ -70,9 +74,13 @@ export const getAlljobs = async (req, res) => {
       return res.status(404).json({ message: "job not found", status: false });
     }
     res.status(200).json({ jobs, status: true });
-  } catch (error) {
-    console.log(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 // users
@@ -87,9 +95,13 @@ export const getJobById = async (req, res) => {
       return res.status(404).json({ message: "Job not found", status: false });
     }
     return res.status(200).json({ job, status: true });
-  } catch (error) {
-    console.log(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
 
 // Admin job create
@@ -104,7 +116,11 @@ export const getAdminJobs = async (req, res) => {
       return res.status(404).json({ message: "No Jobs Found", status: false });
     }
     return res.status(200).json({ Jobs, status: true });
-  } catch (error) {
-    console.log(error);
-  }
+  }catch (error) {
+  console.log(error);
+  return res.status(500).json({
+    message: "Server error",
+    success: false
+  });
+}
 };
