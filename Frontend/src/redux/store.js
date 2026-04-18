@@ -3,11 +3,11 @@ import authReducer from "./authSlice";
 import jobSlice from "./jobslice";
 import jobReducer from "./jobslice";
 import storage from "redux-persist/lib/storage";
-import companySlice  from "./comapnySlice";
-
+import companySlice from "./comapnySlice";
 import {
   persistStore,
   persistReducer,
+  createTransform,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -16,18 +16,27 @@ import {
   REGISTER,
 } from "redux-persist";
 import { applicationSliceReducer } from "./applications";
+
+// ✅ Resets loading to false on every page refresh/rehydration
+const resetLoadingTransform = createTransform(
+  (inboundState) => inboundState,
+  (outboundState) => ({ ...outboundState, loading: false }),
+  { whitelist: ["auth"] }
+);
+
 const persistConfig = {
   key: "root",
   version: 1,
   storage,
+  transforms: [resetLoadingTransform], // ✅ added
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
   job: jobSlice,
   jobs: jobReducer,
-  company: companySlice, 
-  application:applicationSliceReducer
+  company: companySlice,
+  application: applicationSliceReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
