@@ -14,7 +14,7 @@ const app = express();
 
 
 const corsOptions = {
-  origin:"https://job-portal-green-five.vercel.app",
+  origin:["https://job-portal-green-five.vercel.app"],
   credentials: true,                                
 };
 
