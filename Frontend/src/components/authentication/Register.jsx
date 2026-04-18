@@ -119,8 +119,10 @@ const Register = () => {
               <input type="file" accept="image/*" onChange={setFile} onFocus={onFocus} onBlur={onBlur} style={{ ...inputStyle, cursor: "pointer", color: "#64748b" }} />
             </div>
 
-            <button
+            <motion.button
               type="submit" disabled={loading}
+              whileHover={{ scale: 1.02, boxShadow: "0 0 24px rgba(34,211,238,0.35)" }}
+              whileTap={{ scale: 0.98 }}
               style={{
                 marginTop: 6, padding: 13, borderRadius: 12,
                 background: "linear-gradient(135deg,#22d3ee,#0ea5e9)",
@@ -130,7 +132,7 @@ const Register = () => {
               }}
             >
               {loading ? <Loader2 size={18} className="animate-spin" /> : "Create Account →"}
-            </button>
+            </motion.button>
           </form>
 
           <p style={{ textAlign: "center", marginTop: 20, fontSize: 13, color: "#475569" }}>
